@@ -2,9 +2,9 @@ const STORAGE_KEY = "vm2026-tipset-data-v1";
 const CONFIG_KEY = "vm2026-tipset-config-v1";
 const ADMIN_PASSWORD = "vm2026";
 const CLOUD_CONFIG = {
-  masterKey: "",
+  masterKey: "$2a$10$NcZV4da5Bw5CazTuhfQvgOgSX5rkigaV5dfuwLwdYrupyBv2rG.zK",
   accessKey: "",
-  binId: "",
+  binId: "6a2af761da38895dfeaf7b32",
   binName: "vm2026-tipset",
 };
 
