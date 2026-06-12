@@ -1,6 +1,7 @@
 const STORAGE_KEY = "vm2026-tipset-data-v1";
 const CONFIG_KEY = "vm2026-tipset-config-v1";
 const ADMIN_PASSWORD = "vm2026";
+const REQUEST_TIMEOUT_MS = 10000;
 const CLOUD_CONFIG = {
   masterKey: "$2a$10$NcZV4da5Bw5CazTuhfQvgOgSX5rkigaV5dfuwLwdYrupyBv2rG.zK",
   accessKey: "",
@@ -91,10 +92,9 @@ const app = document.querySelector("#app");
 init();
 
 async function init() {
+  render();
   await loadAll();
   render();
 }
 
 async function loadAll() {
-  state.loading = true;
-  state.message = "";
