@@ -77,6 +77,7 @@ const state = {
   adminUnlocked: false,
   adminPass: "",
   adminTab: "entries",
+  adminOpenEntry: "",
   resTips: {},
   resGroupFirst: {},
   resGroupSecond: {},
@@ -442,14 +443,18 @@ function adminEntries() {
   return state.entries
     .map(
       (entry) => `
-        <div class="entry-row">
-          <div class="grow">
-            <div class="entry-name">${esc(entry.name)}</div>
-            <div class="entry-meta">Inlämnad: ${formatDateTime(entry.submittedAt)} · Vinnare: ${esc(entry.winner || "-")}</div>
+        <div class="admin-entry-card">
+          <div class="entry-row">
+            <div class="grow">
+              <div class="entry-name">${esc(entry.name)}</div>
+              <div class="entry-meta">Inlämnad: ${formatDateTime(entry.submittedAt)} · Vinnare: ${esc(entry.winner || "-")}</div>
+            </div>
+            <div class="entry-actions">
+              <button class="small-button" data-toggle-entry="${esc(entry.name)}">${state.adminOpenEntry === entry.name ? "Dölj svar" : "Visa svar"}</button>
+              <button class="small-button danger" data-delete="${esc(entry.name)}">Ta bort</button>
+            </div>
           </div>
-          <div class="entry-actions">
-            <button class="small-button danger" data-delete="${esc(entry.name)}">Ta bort</button>
-          </div>
+          ${state.adminOpenEntry === entry.name ? adminEntryDetails(entry) : ""}
         </div>
       `,
     )
@@ -457,11 +462,53 @@ function adminEntries() {
 }
 
 function bindAdminEntries() {
+  document.querySelectorAll("[data-toggle-entry]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.adminOpenEntry = state.adminOpenEntry === button.dataset.toggleEntry ? "" : button.dataset.toggleEntry;
+      render();
+    });
+  });
   document.querySelectorAll("[data-delete]").forEach((button) => {
     button.addEventListener("click", async () => {
       await deleteEntry(button.dataset.delete);
     });
   });
+}
+
+function adminEntryDetails(entry) {
+  return `
+    <div class="entry-detail">
+      <div class="detail-grid">
+        <div>
+          <div class="detail-title">Sluttips</div>
+          <div class="detail-line">VM-vinnare: <strong>${esc(entry.winner || "-")}</strong></div>
+          <div class="detail-line">Skyttekung: <strong>${esc(entry.scorer || "-")}</strong>${entry.scorerGoals ? `, ${esc(entry.scorerGoals)} mål` : ""}</div>
+        </div>
+        <div>
+          <div class="detail-title">Grupper</div>
+          ${Object.keys(groupTeams)
+            .map((group) => `<div class="detail-line">Grupp ${group}: ${esc(entry.groupFirst?.[group] || "-")} / ${esc(entry.groupSecond?.[group] || "-")}</div>`)
+            .join("")}
+        </div>
+      </div>
+      <div class="detail-title" style="margin-top:12px">Matchtips</div>
+      <div class="tips-grid">
+        ${Object.entries(groupMatches)
+          .map(([group, matches]) => `
+            <div class="tips-group">
+              <div class="tips-group-title">Grupp ${group}</div>
+              ${matches
+                .map(([home, away]) => {
+                  const key = `${group}-${home}-${away}`;
+                  return `<div class="detail-line">${esc(home)} - ${esc(away)}: <strong>${esc(entry.tips?.[key] || "-")}</strong></div>`;
+                })
+                .join("")}
+            </div>
+          `)
+          .join("")}
+      </div>
+    </div>
+  `;
 }
 
 async function deleteEntry(name) {
